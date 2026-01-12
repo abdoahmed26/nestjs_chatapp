@@ -6,6 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dbConfig } from './config/db';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ConversationsModule } from './conversations/conversations.module';
+import { ConversationMembersModule } from './conversation-members/conversation-members.module';
+import { MessagesModule } from './messages/messages.module';
+import { MessageMentionsModule } from './message-mentions/message-mentions.module';
+import { MessageReactionsModule } from './message-reactions/message-reactions.module';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [
@@ -15,8 +21,13 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forRoot(dbConfig.options),
     UsersModule,
     AuthModule,
+    ConversationsModule,
+    ConversationMembersModule,
+    MessagesModule,
+    MessageMentionsModule,
+    MessageReactionsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule {}

@@ -1,34 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Controller, Get, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Query, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/config/uploadfile';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import type { Request } from 'express';
 
-@Controller('users')
+@Controller('api/v1/users')
+@UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get()
+  findAll(@Query('limit') limit = 10, @Query('page') page = 1) {
+    return this.usersService.findAll(limit, page);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Get('me')
+  findMe(@Req() req: Request) {
+    const id = (req as any).user.id;
+    return this.usersService.findOne(id.toString());
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @UseInterceptors(FileInterceptor('profileImage', multerOptions))
+  update(@Param('id') id: string, @Body() data: UpdateUserDto, @UploadedFile() profileImage: Express.Multer.File) {
+    return this.usersService.update(id, data, profileImage ? profileImage.path : undefined);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 }

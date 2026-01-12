@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { pagination } from 'src/helpers/pagination';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
+
+  async findAll(limit:number , page:number) {
+    const [users, count] = await this.userRepository.findAndCount({
+      select: ['id', 'name', 'email', 'profileImage', 'createdAt', 'updatedAt'],
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    const pagin = pagination(limit,page,count);
+    return {status: 'success', data: {users, pagination: pagin}};
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findOne(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'email', 'profileImage', 'createdAt', 'updatedAt'],
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id # ${id} # not found`);
+    }
+    return {status: 'success', data: user};
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async update(id: string, data: UpdateUserDto,profileImage:string | undefined) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id # ${id} # not found`);
+    }
+    const image = profileImage ? profileImage : user.profileImage;
+    await this.userRepository.update(id, { ...data, profileImage: image });
+    const updatedUser = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'email', 'profileImage', 'createdAt', 'updatedAt'],
+    });
+    return {status: 'success', data: updatedUser};
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id # ${id} # not found`);
+    }
+    await this.userRepository.delete(id);
+    return {status: 'success', message: `User with id #${id} has been removed`};
   }
 }

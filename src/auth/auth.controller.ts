@@ -18,7 +18,7 @@ export class AuthController {
   @Post('register')
   @UseInterceptors(FileInterceptor('profileImage',multerOptions))
   register(@Body() data: CreateUserDto,@UploadedFile() profileImage:Express.Multer.File) {
-    return this.authService.register(data,profileImage.path ? profileImage.path : undefined);
+    return this.authService.register(data,profileImage ? profileImage.path : undefined);
   }
 
   @Get('google')
