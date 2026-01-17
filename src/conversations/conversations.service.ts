@@ -1,26 +1,76 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Conversation } from './entities/conversation.entity';
+import { Repository } from 'typeorm';
+import { ConversationMember, ConversationMemberRole } from 'src/conversation-members/entities/conversation-member.entity';
 
 @Injectable()
 export class ConversationsService {
-  create(createConversationDto: CreateConversationDto) {
-    return 'This action adds a new conversation';
+  constructor(
+    @InjectRepository(Conversation)
+    private readonly conversationRepository: Repository<Conversation>,
+    @InjectRepository(ConversationMember)
+    private readonly conversationMemberRepository: Repository<ConversationMember>,
+  ) {}
+  async create(data: CreateConversationDto, userId: string, image: string | undefined) {
+    const conversation = this.conversationRepository.create({
+      ...data,
+      image: image,
+      creator: { id: userId },
+    });
+    await this.conversationRepository.save(conversation);
+    const conversationMember = this.conversationMemberRepository.create({
+      conversation: { id: conversation.id },
+      user: { id: userId },
+      role: ConversationMemberRole.ADMIN,
+    });
+    await this.conversationMemberRepository.save(conversationMember);
+    return {status:"success", message: 'Conversation created successfully', conversation};
   }
 
-  findAll() {
-    return `This action returns all conversations`;
+  async findAll(userId:string) {
+    console.log("Finding conversations for user:", userId);
+    const conversations = await this.conversationMemberRepository.find({
+      where:{
+        userId
+      },
+      relations: ['conversation'],
+    });
+    return {status:"success", conversations};
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} conversation`;
+  async findOne(id: string) {
+    const conversation = await this.conversationRepository.findOne({
+      where:{id}
+    })
+    if(!conversation){
+      throw new NotFoundException({status:"not found", message:"Conversation not found"});
+    }
+    return {status:"success", conversation};
   }
 
-  update(id: number, updateConversationDto: UpdateConversationDto) {
-    return `This action updates a #${id} conversation`;
+  async update(id: string, data: UpdateConversationDto, image: string | undefined) {
+    const conversation = await this.conversationRepository.findOne({
+      where:{id}
+    })
+    if(!conversation){
+      throw new NotFoundException({status:"not found", message:"Conversation not found"});
+    }
+    const imageToUpdate = image ? image : conversation.image;
+    await this.conversationRepository.update(id, {...data, image: imageToUpdate});
+    return {status:"success", message: 'Conversation updated successfully'};
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} conversation`;
+  async remove(id: string) {
+    const conversation = await this.conversationRepository.findOne({
+      where:{id}
+    })
+    if(!conversation){
+      throw new NotFoundException({status:"not found", message:"Conversation not found"});
+    }
+    await this.conversationRepository.delete(id);
+    return {status:"success", message: 'Conversation removed successfully'};
   }
 }

@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Req } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/config/uploadfile';
+import type { Request } from 'express';
+import { AdminGuard } from 'src/common/guards/admin.guard';
 
-@Controller('conversations')
+@Controller('api/v1/conversations')
+@UseGuards(AuthGuard)
 export class ConversationsController {
   constructor(private readonly conversationsService: ConversationsService) {}
 
   @Post()
-  create(@Body() createConversationDto: CreateConversationDto) {
-    return this.conversationsService.create(createConversationDto);
+  @UseInterceptors(FileInterceptor('image', multerOptions))
+  create(@Body() data: CreateConversationDto, @UploadedFile() image: Express.Multer.File, @Req() req: Request) {
+    const userId = (req as any).user.id;
+    return this.conversationsService.create(data, userId, image ? image.path : undefined);
   }
 
   @Get()
-  findAll() {
-    return this.conversationsService.findAll();
+  findAll(@Req() req: Request) {
+    const userId = (req as any).user.id;
+    return this.conversationsService.findAll(userId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.conversationsService.findOne(+id);
+    return this.conversationsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConversationDto: UpdateConversationDto) {
-    return this.conversationsService.update(+id, updateConversationDto);
+  @UseGuards(AdminGuard)
+  @UseInterceptors(FileInterceptor('image', multerOptions))
+  update(@Param('id') id: string, @Body() data: UpdateConversationDto, @UploadedFile() image: Express.Multer.File) {
+    return this.conversationsService.update(id, data, image ? image.path : undefined);
   }
 
   @Delete(':id')
+  @UseGuards(AdminGuard)
   remove(@Param('id') id: string) {
-    return this.conversationsService.remove(+id);
+    return this.conversationsService.remove(id);
   }
 }

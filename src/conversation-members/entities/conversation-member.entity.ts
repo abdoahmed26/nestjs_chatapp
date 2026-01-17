@@ -18,6 +18,9 @@ export class ConversationMember {
     @UpdateDateColumn({ type:"timestamp"})
     updatedAt:Date;
 
+    @Column({ type: "uuid" })
+    userId:string;
+
     @ManyToOne(() => User, user => user.conversationsMember, { onDelete: "CASCADE" , onUpdate: "CASCADE"})
     @JoinColumn({ name: "userId" })
     user:User;

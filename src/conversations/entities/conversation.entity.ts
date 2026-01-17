@@ -12,12 +12,12 @@ export enum ConversationType {
 export class Conversation {
     @PrimaryGeneratedColumn("uuid")
     id:string;
-    @Column({ type: "varchar", length: 255 })
-    title:string;
-    @Column({ type: "text", nullable: true })
-    description:string;
     @Column({ type: "varchar", length: 255, nullable: true })
-    image:string;
+    title?:string;
+    @Column({ type: "text", nullable: true })
+    description?:string;
+    @Column({ type: "varchar", length: 255, nullable: true })
+    image?:string;
     @Column({ type: "enum", enum: ConversationType })
     type:ConversationType;
     @CreateDateColumn({ type:"timestamp"})
