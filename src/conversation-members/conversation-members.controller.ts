@@ -5,7 +5,7 @@ import { UpdateConversationMemberDto } from './dto/update-conversation-member.dt
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 
-@Controller('api/v1/conversation-members')
+@Controller(`${process.env.API_VERSION}/conversation-members`)
 @UseGuards(AuthGuard)
 export class ConversationMembersController {
   constructor(private readonly conversationMembersService: ConversationMembersService) {}

@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Conversation } from 'src/conversations/entities/conversation.entity';
+import { Repository } from 'typeorm';
 
 @WebSocketGateway({
   cors:{
@@ -15,7 +18,10 @@ export class ChatGateway {
 
   onlineUsers = new Set();
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    @InjectRepository(Conversation) private readonly conversationRepository: Repository<Conversation>,
+  ) {}
 
   async handleConnection(client: Socket) {
     const auth = client.handshake.headers.authorization;
@@ -31,6 +37,17 @@ export class ChatGateway {
       this.onlineUsers.add(payload.id);
       this.server.emit('onlineUsers', Array.from(this.onlineUsers));
       console.log('Client connected:', payload.id);
+      const conversations = await this.conversationRepository.find({
+        where:{
+          members:{
+            userId:payload.id
+          }
+        },
+        relations:['members']
+      });
+      for (const conversation of conversations) {
+        await client.join(conversation.id);
+      }
     } catch(e) {
       throw new UnauthorizedException(e.message);
     }

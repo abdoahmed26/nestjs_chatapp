@@ -11,7 +11,7 @@ import { ConversationMembersModule } from './conversation-members/conversation-m
 import { MessagesModule } from './messages/messages.module';
 import { MessageMentionsModule } from './message-mentions/message-mentions.module';
 import { MessageReactionsModule } from './message-reactions/message-reactions.module';
-import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -26,8 +26,9 @@ import { ChatGateway } from './chat/chat.gateway';
     MessagesModule,
     MessageMentionsModule,
     MessageReactionsModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [AppService],
 })
 export class AppModule {}

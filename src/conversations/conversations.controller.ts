@@ -9,7 +9,7 @@ import { multerOptions } from 'src/config/uploadfile';
 import type { Request } from 'express';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 
-@Controller('api/v1/conversations')
+@Controller(`${process.env.API_VERSION}/conversations`)
 @UseGuards(AuthGuard)
 export class ConversationsController {
   constructor(private readonly conversationsService: ConversationsService) {}

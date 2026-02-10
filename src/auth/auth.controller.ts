@@ -6,7 +6,7 @@ import { multerOptions } from 'src/config/uploadfile';
 import { GoogleAuthGuard } from 'src/common/guards/google.guard';
 import type { Request, Response } from 'express';
 
-@Controller('/api/v1/auth')
+@Controller(`${process.env.API_VERSION}/auth`)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

@@ -7,7 +7,7 @@ import { multerOptions } from 'src/config/uploadfile';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import type { Request } from 'express';
 
-@Controller('api/v1/users')
+@Controller(`${process.env.API_VERSION}/users`)
 @UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
