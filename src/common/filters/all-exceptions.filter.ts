@@ -29,13 +29,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
                 statusCode: status,
                 timestamp: new Date().toISOString(),
                 path: request.url,
-                error: message,
+                data: message,
             });
         }else{
             response.status(status).json({
                 statusCode: status,
                 timestamp: new Date().toISOString(),
-                error: message,
+                data: message,
             });
         }
     }

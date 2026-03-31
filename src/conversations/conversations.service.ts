@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Conversation } from './entities/conversation.entity';
 import { Repository } from 'typeorm';
 import { ConversationMember, ConversationMemberRole } from 'src/conversation-members/entities/conversation-member.entity';
+import { pagination } from 'src/helpers/pagination';
 
 @Injectable()
 export class ConversationsService {
@@ -27,18 +28,32 @@ export class ConversationsService {
       role: ConversationMemberRole.ADMIN,
     });
     await this.conversationMemberRepository.save(conversationMember);
+    if (data.membersIds && data.membersIds.length > 0) {
+      const membersToAdd = data.membersIds.map((memberId) => {
+        return this.conversationMemberRepository.create({
+          conversation: { id: conversation.id },
+          user: { id: memberId },
+          role: ConversationMemberRole.MEMBER,
+        });
+      });
+      await this.conversationMemberRepository.save(membersToAdd);
+    }
     return {status:"success", message: 'Conversation created successfully', conversation};
   }
 
-  async findAll(userId:string) {
-    console.log("Finding conversations for user:", userId);
-    const conversations = await this.conversationMemberRepository.find({
+  async findAll(userId:string, limit: number, page: number) {
+    const [conversations, total] = await this.conversationRepository.findAndCount({
       where:{
-        userId
+        members:{
+          user:{id:userId}
+        }
       },
-      relations: ['conversation'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: {createdAt: "DESC"}
     });
-    return {status:"success", conversations};
+    const pagin = pagination(limit, page, total);
+    return {status:"success", conversations, pagination: pagin};
   }
 
   async findOne(id: string) {

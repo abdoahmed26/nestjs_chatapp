@@ -8,7 +8,7 @@ A real-time chat application backend built with **NestJS**, **TypeORM**, **Postg
 | -------------- | --------------------------------------------------- |
 | Framework      | [NestJS](https://nestjs.com/) 11                    |
 | Language       | TypeScript 5                                        |
-| Database       | PostgreSQL (via `pg`)                                |
+| Database       | PostgreSQL (via `pg`)                               |
 | ORM            | TypeORM 0.3                                         |
 | Authentication | JWT + Passport (Google OAuth)                       |
 | Real-time      | Socket.IO (`@nestjs/websockets`)                    |
@@ -105,9 +105,6 @@ Users ──┬── Conversations (creator)
 | Method | Endpoint | Description          |
 | ------ | -------- | -------------------- |
 | POST   | `/`      | Create mention       |
-| GET    | `/`      | List all mentions    |
-| GET    | `/:id`   | Get mention by ID    |
-| PATCH  | `/:id`   | Update mention       |
 | DELETE | `/:id`   | Delete mention       |
 
 ### Message Reactions — `/message-reactions`
@@ -115,9 +112,6 @@ Users ──┬── Conversations (creator)
 | Method | Endpoint | Description          |
 | ------ | -------- | -------------------- |
 | POST   | `/`      | Create reaction      |
-| GET    | `/`      | List all reactions   |
-| GET    | `/:id`   | Get reaction by ID   |
-| PATCH  | `/:id`   | Update reaction      |
 | DELETE | `/:id`   | Delete reaction      |
 
 ## WebSocket Events
@@ -230,7 +224,3 @@ src/
 ├── app.module.ts              # Root module
 └── main.ts                    # Application bootstrap
 ```
-
-## License
-
-UNLICENSED

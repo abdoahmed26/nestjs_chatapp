@@ -24,7 +24,7 @@ export class ConversationsController {
   @Get()
   findAll(@Req() req: Request) {
     const userId = (req as any).user.id;
-    return this.conversationsService.findAll(userId);
+    return this.conversationsService.findAll(userId, +(req.query.limit || 10), +(req.query.page || 1));
   }
 
   @Get(':id')

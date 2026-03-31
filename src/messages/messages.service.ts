@@ -36,7 +36,22 @@ export class MessagesService {
     if (!conversation) {
       throw new NotFoundException({ status: "not found", message: "Conversation not found" });
     }
-    const messages = await this.messageRepository.find({ where: { conversation: { id } }, relations: ['sender', 'parentMessage', 'reactions', 'mentions'] });
+    const messages = await this.messageRepository.find({ 
+      where: { conversation: { id } }, 
+      relations: {
+        sender: true,
+        parentMessage: {
+          sender: true
+        },
+        reactions: {
+          user: true
+        },
+        mentions: {
+          user: true,
+        }
+      },
+      order: { createdAt: "ASC" }
+    });
     return { status: "success", data: messages };
 
   }
