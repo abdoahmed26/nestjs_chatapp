@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { ConversationType } from "../entities/conversation.entity";
 
 export class CreateConversationDto {
@@ -11,4 +11,8 @@ export class CreateConversationDto {
     @IsNotEmpty({ message: "type is required" })
     @IsEnum(["private", "group", "channel"], { message: "type must be one of the following values: private, group, channel" })
     type: ConversationType;
+    @IsOptional()
+    @IsArray({ message: "membersIds must be an array of strings" })
+    @IsString({ each: true, message: "each memberId must be a string" })
+    membersIds?: string[];
 }

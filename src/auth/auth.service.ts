@@ -26,7 +26,7 @@ export class AuthService {
       throw new BadRequestException({status:"bad request",message: 'Invalid credentials'});
     }
     const token = this.jwtService.sign({id: user.id,email: user.email}, {expiresIn:"1d"});
-    return {status:"success",data:{token}};
+    return {status:"success",data:{token, user}};
   }
 
   async register(data: CreateUserDto,profileImage:string | undefined) {

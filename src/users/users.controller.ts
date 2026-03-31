@@ -13,8 +13,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll(@Query('limit') limit = 10, @Query('page') page = 1) {
-    return this.usersService.findAll(limit, page);
+  findAll(@Query('limit') limit = 10, @Query('page') page = 1, @Query('search') search?: string) {
+    return this.usersService.findAll(limit, page, search);
   }
 
   @Get('me')

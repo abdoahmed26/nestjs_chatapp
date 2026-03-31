@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { pagination } from 'src/helpers/pagination';
 
 @Injectable()
@@ -13,14 +13,20 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findAll(limit:number , page:number) {
+  async findAll(limit:number , page:number, search?:string) {
     const [users, count] = await this.userRepository.findAndCount({
+      where: search ? [
+        { name: ILike(`%${search}%`) },
+        { email: ILike(`%${search}%`) },
+      ] 
+      : {},
       select: ['id', 'name', 'email', 'profileImage', 'createdAt', 'updatedAt'],
       skip: (page - 1) * limit,
       take: limit,
+      order: {createdAt: "DESC"}
     });
     const pagin = pagination(limit,page,count);
-    return {status: 'success', data: {users, pagination: pagin}};
+    return {status: 'success', users, pagination: pagin};
   }
 
   async findOne(id: string) {

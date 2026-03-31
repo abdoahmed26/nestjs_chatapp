@@ -15,9 +15,9 @@ export class Message {
     files?:string[];
     @Column({ type: "boolean", default: false })
     seen:boolean;
-    @CreateDateColumn({ type:"timestamp"})
+    @CreateDateColumn({ type:"timestamptz"})
     createdAt:Date;
-    @UpdateDateColumn({ type:"timestamp"})
+    @UpdateDateColumn({ type:"timestamptz"})
     updatedAt:Date;
 
     @ManyToOne(() => Message, message => message.replies, { onDelete: "SET NULL" , onUpdate: "CASCADE"})
