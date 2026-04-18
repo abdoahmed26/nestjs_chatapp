@@ -12,6 +12,7 @@ import { MessagesModule } from './messages/messages.module';
 import { MessageMentionsModule } from './message-mentions/message-mentions.module';
 import { MessageReactionsModule } from './message-reactions/message-reactions.module';
 import { ChatModule } from './chat/chat.module';
+import { CallsModule } from './calls/calls.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ChatModule } from './chat/chat.module';
     MessageMentionsModule,
     MessageReactionsModule,
     ChatModule,
+    CallsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

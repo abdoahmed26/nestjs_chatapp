@@ -4,6 +4,7 @@ import { Conversation } from "../../conversations/entities/conversation.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { MessageReaction } from "../../message-reactions/entities/message-reaction.entity";
 import { MessageMention } from "../../message-mentions/entities/message-mention.entity";
+import { Call } from "../../calls/entities/call.entity";
 
 @Entity("users")
 export class User {
@@ -41,4 +42,10 @@ export class User {
 
     @OneToMany(() => MessageMention, (messageMention) => messageMention.user)
     messagesMention: MessageMention[];
+
+    @OneToMany(() => Call, (call) => call.caller)
+    callerCalls: Call[];
+
+    @OneToMany(() => Call, (call) => call.callee)
+    calleeCalls: Call[];
 }

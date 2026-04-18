@@ -27,7 +27,7 @@ A real-time chat application backend built with **NestJS**, **TypeORM**, **Postg
 - [x] Message reactions
 - [x] Message mentions (@user)
 - [x] Real-time WebSocket gateway (online users, live messaging)
-- [ ] Calls
+- [x] Calls
 
 ## Database Schema
 
@@ -36,7 +36,8 @@ Users ──┬── Conversations (creator)
         ├── ConversationMembers (user ↔ conversation, role)
         ├── Messages (sender, conversation, parentMessage)
         ├── MessageReactions (user ↔ message, reaction)
-        └── MessageMentions (user ↔ message)
+        ├── MessageMentions (user ↔ message)
+        └── Calls (caller ↔ callee, conversation)
 ```
 
 ### Entities
@@ -49,6 +50,7 @@ Users ──┬── Conversations (creator)
 | **Message**           | id, content, files, seen, senderId, conversationId, parentMessageId |
 | **MessageReaction**   | id, reaction, messageId, userId                         |
 | **MessageMention**    | id, messageId, userId                                   |
+| **Call**              | id, type (audio/video), status (ringing/ongoing/ended/missed/rejected), callerId, calleeId, conversationId, startedAt, endedAt, duration |
 
 ## API Endpoints
 
@@ -114,6 +116,14 @@ Users ──┬── Conversations (creator)
 | POST   | `/`      | Create reaction      |
 | DELETE | `/:id`   | Delete reaction      |
 
+### Calls — `/api/v1/calls` *(Auth required)*
+
+| Method | Endpoint | Description            |
+| ------ | -------- | ---------------------- |
+| GET    | `/`      | Get user's call history |
+| GET    | `/:id`   | Get call details       |
+| PATCH  | `/:id`   | Update call status     |
+
 ## WebSocket Events
 
 Connect to the WebSocket server with an `Authorization: Bearer <token>` header.
@@ -124,6 +134,24 @@ Connect to the WebSocket server with an `Authorization: Bearer <token>` header.
 | `message`        | Bidirectional   | Send/receive messages              |
 | `messageUpdated` | Server → Client | Message was updated                |
 | `messageDeleted` | Server → Client | Message was deleted                |
+
+### Call Signaling Events
+
+| Event            | Direction       | Description                                      |
+| ---------------- | --------------- | ------------------------------------------------ |
+| `call:initiate`  | Client → Server | Start a call (`{ calleeId, type, conversationId? }`) |
+| `call:incoming`  | Server → Client | Notify callee of incoming call                   |
+| `call:accept`    | Client → Server | Accept an incoming call                          |
+| `call:accepted`  | Server → Client | Notify caller that callee accepted               |
+| `call:reject`    | Client → Server | Reject an incoming call                          |
+| `call:rejected`  | Server → Client | Notify caller that callee rejected               |
+| `call:end`       | Client → Server | End an active call                               |
+| `call:ended`     | Server → Client | Notify both peers that call ended (with duration)|
+| `call:busy`      | Server → Client | Callee is already in a call                      |
+| `call:timeout`   | Server → Client | No answer within 30 seconds                      |
+| `signal:offer`   | Bidirectional   | Forward WebRTC SDP offer to peer                 |
+| `signal:answer`  | Bidirectional   | Forward WebRTC SDP answer to peer                |
+| `signal:ice`     | Bidirectional   | Forward ICE candidate to peer                    |
 
 ## Getting Started
 
@@ -219,6 +247,7 @@ src/
 ├── messages/                  # Messages CRUD with file support
 ├── message-mentions/          # @mentions on messages
 ├── message-reactions/         # Reactions on messages
+├── calls/                     # 1:1 audio/video calls (entity, service, controller, gateway)
 ├── migrations/                # TypeORM migrations
 ├── users/                     # Users CRUD
 ├── app.module.ts              # Root module
