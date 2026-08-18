@@ -2,7 +2,7 @@
 
 A real-time chat application backend built with **NestJS**, **TypeORM**, **PostgreSQL**, and **Socket.IO**.
 
-## Tech Stack
+## Tech Stack 
 
 | Layer          | Technology                                          |
 | -------------- | --------------------------------------------------- |
